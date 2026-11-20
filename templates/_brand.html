@@ -1,0 +1,8 @@
+{# 品牌字标（导航栏与页脚共用）。
+   class 传入 brand 或 brand brand-footer #}
+<a class="brand {{ extra or '' }}" href="{{ url_for('index') }}">
+  <span class="brand-mark" aria-hidden="true">
+    <svg viewBox="0 0 32 32"><path d="M7 23 L16 7 L25 23" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><circle cx="16" cy="18.5" r="2.6" fill="currentColor"/></svg>
+  </span>
+  <span class="brand-text"><strong>格物</strong><em>SCIENCE, EXPLAINED</em></span>
+</a>

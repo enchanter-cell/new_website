@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}格物 · 科技科普{% endblock %}</title>
+  <meta name="description" content="{% block desc %}格物——把前沿科技讲成人话的科普站点：人工智能、生命科学、物理、航天与材料。{% endblock %}">
+  {# 版本号 v=20261116 用于强制浏览器更新缓存；改完样式/脚本就改一下这个数 #}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=20261116">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23101418'/><path d='M8 22 L16 8 L24 22' stroke='%234fd1c5' stroke-width='2.4' fill='none'/><circle cx='16' cy='18' r='2' fill='%234fd1c5'/></svg>">
+</head>
+<body class="{% block bodyclass %}{% endblock %}">
+  <div class="read-progress" id="readProgress" hidden><span></span></div>
+
+  <header class="site-header" id="siteHeader">
+    <div class="wrap header-inner">
+      {% with extra = '' %}{% include '_brand.html' %}{% endwith %}
+
+      <nav class="nav" id="siteNav">
+        <a href="{{ url_for('index') }}" class="nav-link {% if active=='home' %}is-active{% endif %}">首页</a>
+        <a href="{{ url_for('index') }}#topics" class="nav-link">知识板块</a>
+        <a href="{{ url_for('books') }}" class="nav-link {% if active=='books' %}is-active{% endif %}">推荐书单</a>
+        <a href="{{ url_for('index') }}#about" class="nav-link">关于格物</a>
+        {# 移动端：桌面端的登录按钮被隐藏了，所以在菜单里补一个入口 #}
+        {% if current_user %}
+          <a href="{{ url_for('logout') }}" class="nav-link nav-auth">退出登录（{{ current_user.nickname }}）</a>
+        {% else %}
+          <a href="{{ url_for('login') }}" class="nav-link nav-auth">登录 / 注册</a>
+        {% endif %}
+      </nav>
+
+      <div class="header-actions">
+        {% if current_user %}
+          <span class="user-chip">
+            <span class="avatar avatar-xs">{{ current_user.nickname[0] }}</span>
+            {{ current_user.nickname }}
+          </span>
+          <a class="btn btn-ghost btn-sm" href="{{ url_for('logout') }}">退出</a>
+        {% else %}
+          <a class="btn btn-ghost btn-sm" href="{{ url_for('login') }}">登录</a>
+          <a class="btn btn-solid btn-sm" href="{{ url_for('register') }}"><span class="hide-sm">免费</span>注册</a>
+        {% endif %}
+        <button class="nav-toggle" id="navToggle" aria-label="展开菜单" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  {# flash 消息：每个请求消费一次 #}
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="wrap">
+        <div class="flash-zone" id="flashZone">
+          {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">
+              <i></i><span>{{ message }}</span>
+              <button type="button" aria-label="关闭提示" onclick="this.parentElement.remove()">×</button>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <main id="main">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-grid">
+      <div class="footer-brand">
+        {% with extra = 'brand-footer' %}{% include '_brand.html' %}{% endwith %}
+        <p>把前沿科技讲成人话。每篇文章都标注信息来源，出错必勘误。</p>
+      </div>
+      <div class="footer-col">
+        <h4>阅读</h4>
+        <a href="{{ url_for('index') }}#topics">全部文章</a>
+        <a href="{{ url_for('books') }}">推荐书单</a>
+        <a href="{{ url_for('index') }}#topics">专题合辑</a>
+      </div>
+      <div class="footer-col">
+        <h4>参与</h4>
+        <a href="{{ url_for('register') }}">成为作者</a>
+        <a href="{{ url_for('comment') }}">读者反馈</a>
+        {% if current_user %}
+          <a href="{{ url_for('logout') }}">退出登录</a>
+        {% else %}
+          <a href="{{ url_for('login') }}">登录账号</a>
+        {% endif %}
+      </div>
+      <div class="footer-col">
+        <h4>关于</h4>
+        <a href="{{ url_for('index') }}#about">我们是谁</a>
+        <a href="{{ url_for('index') }}#about">内容准则</a>
+        <a href="{{ url_for('index') }}#about">勘误记录</a>
+      </div>
+    </div>
+    <div class="wrap footer-bottom">
+      <span>© {{ site_year }} 格物 GeWu · 学习用途演示站点</span>
+      <span>内容仅供科普参考，不构成专业建议</span>
+    </div>
+  </footer>
+
+  <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+  <script src="{{ url_for('static', filename='js/main.js') }}?v=20261116"></script>
+</body>
+</html>

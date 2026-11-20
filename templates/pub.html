@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% block title %}发表评论 · {{ article.title }} · 格物{% endblock %}
+
+{% block content %}
+
+<section class="page-hero">
+  <div class="wrap">
+    <nav class="breadcrumb" aria-label="位置">
+      <a href="{{ url_for('index') }}">首页</a>
+      <span class="sep">/</span>
+      <a href="{{ url_for('detail', slug=article.slug) }}">{{ article.cat }}</a>
+      <span class="sep">/</span>
+      <span>发表评论</span>
+    </nav>
+    <h1>写下你的看法</h1>
+    <p>
+      读到不同意见是好事。请尽量说清“哪一段”“为什么不同意”，
+      这样的评论会出现在文章下方，并可能被作者直接回复。
+    </p>
+  </div>
+</section>
+
+<div class="wrap">
+  <div class="form-layout">
+    <!-- 表单 -->
+    <form class="compose-card" id="commentForm" method="post" action="{{ url_for('comment') }}" novalidate>
+      <input type="hidden" name="article" value="{{ article.slug }}">
+      <input type="hidden" name="stars" id="starsInput" value="0">
+
+      <div class="field">
+        <div class="label-row">
+          <label class="label" for="guestName">你的昵称<span class="req">*</span></label>
+          {% if current_user %}
+            <span class="hint">已登录，自动使用账号昵称</span>
+          {% else %}
+            <span class="hint">会公开展示，建议别用真名</span>
+          {% endif %}
+        </div>
+        {% if current_user %}
+          <input class="input" id="guestName" name="name" type="text" value="{{ current_user.nickname }}" readonly>
+        {% else %}
+          <input class="input" id="guestName" name="name" type="text" placeholder="例如：物理系小张" maxlength="20" autocomplete="nickname">
+        {% endif %}
+      </div>
+
+      <div class="field">
+        <div class="label-row">
+          <span class="label">这篇写得怎么样<span class="req">*</span></span>
+          <span class="hint">点击星星评分</span>
+        </div>
+        <div class="rating" id="ratingBox" role="radiogroup" aria-label="评分">
+          <button type="button" aria-label="1 星">☆</button>
+          <button type="button" aria-label="2 星">☆</button>
+          <button type="button" aria-label="3 星">☆</button>
+          <button type="button" aria-label="4 星">☆</button>
+          <button type="button" aria-label="5 星">☆</button>
+          <span class="rating-label" id="ratingLabel">还没有评分</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="label-row">
+          <span class="label">想说的重点</span>
+          <span class="hint">点一下自动带入，可继续编辑</span>
+        </div>
+        <div class="quick-tags">
+          <button type="button" data-quick-tag="有个地方没看懂">有个地方没看懂</button>
+          <button type="button" data-quick-tag="这里的比喻很到位">这里的比喻很到位</button>
+          <button type="button" data-quick-tag="补充一个不同观点">补充一个不同观点</button>
+          <button type="button" data-quick-tag="发现一处事实错误">发现一处事实错误</button>
+          <button type="button" data-quick-tag="希望能展开讲讲">希望能展开讲讲</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="label-row">
+          <label class="label" for="commentBody">评论内容<span class="req">*</span></label>
+          <span class="hint" id="charCount">0 / 500</span>
+        </div>
+        <textarea class="textarea" id="commentBody" name="content" maxlength="520"
+                  placeholder="建议从具体的一段写起，比如：第二节里把纠缠比作「共用一套衣服」，我觉得还可以补充……"></textarea>
+      </div>
+
+      <div class="field">
+        <div class="label-row">
+          <label class="label" for="commentRef">针对哪一节</label>
+          <span class="hint">选填，方便作者定位</span>
+        </div>
+        <select class="select" id="commentRef" name="section">
+          <option value="">整篇文章</option>
+          {% for h in article.blocks if h.t == 'h2' %}
+            <option value="{{ h.id }}">{{ h.text }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="field">
+        <div class="label-row">
+          <span class="label">配图</span>
+          <span class="hint">选填，最多 1 张，5MB 以内</span>
+        </div>
+        <label class="upload" for="commentFile">
+          <input id="commentFile" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+          <b>点击上传截图或手绘图</b>
+          <span>支持 PNG / JPG / WEBP，单张不超过 5MB</span>
+        </label>
+      </div>
+
+      <div class="field">
+        <label class="checkline">
+          <input type="checkbox" id="agreeComment" name="agree" value="1">
+          <span>我同意遵守《评论规范》：不人身攻击、不发布广告、引用数据时尽量给出来源。详见 <a href="{{ url_for('index') }}#about">内容准则</a>。</span>
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-accent" type="submit">发布评论</button>
+        <button class="btn btn-ghost" type="reset" id="resetForm">清空重写</button>
+        <span class="hint">提交后会自动回到文章正文，评论显示在最上方</span>
+      </div>
+    </form>
+
+    <!-- 右侧信息 -->
+    <aside class="sidebar" style="position:static">
+      <div class="side-card">
+        <div class="side-title">正在评论</div>
+        <a class="article-ref" href="{{ url_for('detail', slug=article.slug) }}">
+          <span class="thumb"></span>
+          <div>
+            <b>{{ article.title }}</b>
+            <span>{{ article.author }} · {{ article.read }}</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="side-card">
+        <div class="side-title">评论规范</div>
+        <ul class="rules">
+          <li>先读完全文再评论，避免只针对标题判断。</li>
+          <li>指出错误时，尽量写出正确说法或来源链接。</li>
+          <li>不发布个人联系方式、广告与无关内容。</li>
+          <li>评论会在 30 分钟内完成审核并公开。</li>
+        </ul>
+      </div>
+
+      <div class="side-card">
+        <div class="side-title">本周读者</div>
+        <dl class="facts">
+          <div><dt>新增评论</dt><dd>128 条</dd></div>
+          <div><dt>作者回复</dt><dd>41 条</dd></div>
+          <div><dt>采纳勘误</dt><dd>6 处</dd></div>
+          <div><dt>平均审核时长</dt><dd>18 分钟</dd></div>
+        </dl>
+      </div>
+
+      <div class="side-card" style="background:var(--accent-soft);border-color:#cbe5e0">
+        <div class="side-title" style="color:#3d7d76">成为常驻作者</div>
+        <p style="font-size:13.5px;color:#17423e;margin:0 0 14px">如果你能持续把某个领域讲清楚，欢迎把作品发给我们。</p>
+        <a class="btn btn-accent btn-sm btn-block" href="{{ url_for('register') }}">注册并申请</a>
+      </div>
+    </aside>
+  </div>
+</div>
+
+{% endblock %}

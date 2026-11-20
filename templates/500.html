@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}服务器开小差了 · 格物{% endblock %}
+
+{% block content %}
+<section class="not-found">
+  <div class="wrap">
+    <div class="code">500</div>
+    <h1>服务器这边出了点意外</h1>
+    <p>页面本身没坏，是后台处理请求时抛了异常。开发阶段可以看终端里的报错堆栈定位；上线后这类细节不应该展示给用户。</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <a class="btn btn-solid" href="{{ url_for('index') }}">回到首页</a>
+      <a class="btn btn-ghost" href="{{ url_for('api_health') }}">查看服务自检</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

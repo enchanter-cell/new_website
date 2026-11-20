@@ -1,0 +1,30 @@
+{# 分页条。
+   依赖上下文变量：page（当前页）、total_pages（总页数）、page_url(页码) → 链接。
+   路由里定义好 page_url 后，直接 {% include '_pagination.html' %} 即可。 #}
+{% if total_pages > 1 %}
+<nav class="pagination" aria-label="分页导航">
+  {% if page > 1 %}
+    <a href="{{ page_url(page - 1) }}">上一页</a>
+  {% else %}
+    <span class="disabled">上一页</span>
+  {% endif %}
+
+  {% set dots_shown = [] %}
+  {% for p in range(1, total_pages + 1) %}
+    {% if p == page %}
+      <span class="page-num is-current" aria-current="page">{{ p }}</span>
+    {% elif total_pages <= 7 or p <= 2 or p > total_pages - 2 or (p >= page - 1 and p <= page + 1) %}
+      <a class="page-num" href="{{ page_url(p) }}">{{ p }}</a>
+    {% elif dots_shown|length == 0 or dots_shown[-1] != loop.index0 - 1 %}
+      {% set _ = dots_shown.append(loop.index0 - 1) %}
+      <span class="page-dots">…</span>
+    {% endif %}
+  {% endfor %}
+
+  {% if page < total_pages %}
+    <a href="{{ page_url(page + 1) }}">下一页</a>
+  {% else %}
+    <span class="disabled">下一页</span>
+  {% endif %}
+</nav>
+{% endif %}

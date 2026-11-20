@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}注册 · 格物{% endblock %}
+{% block bodyclass %}auth-page{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+
+  {% set side_title = '从今天起，<br>每周弄懂<em>一件事</em>。' %}
+  {% set side_lead = '注册只需一分钟。我们会按你选的板块，把新文章推给你。' %}
+  {% set side_list = ['按兴趣订阅板块，不推送无关内容', '评论、收藏、阅读进度全部云端保存', '可申请成为作者，稿件由编辑部协助打磨'] %}
+  {% set side_foot = '已注册读者 12,480 人 · 累计评论 3,206 条' %}
+  {% include '_auth_side.html' %}
+
+  <!-- 右侧表单 -->
+  <main class="auth-main">
+    <div class="auth-form">
+      <a class="auth-back" href="{{ url_for('index') }}">← 返回首页</a>
+      <div class="kicker">Create account</div>
+      <h1>创建你的账号</h1>
+      <p class="lead">已有账号？<a href="{{ url_for('login') }}" style="color:var(--accent-ink);font-weight:600">直接登录</a></p>
+
+      <form id="registerForm" method="post" action="{{ url_for('register') }}" novalidate>
+        {% if error %}<div class="form-error">{{ error }}</div>{% endif %}
+
+        <div class="field">
+          <div class="label-row"><label class="label" for="nickname">昵称<span class="req">*</span></label><span class="hint">2–20 个字</span></div>
+          <input class="input" id="nickname" name="nickname" type="text" value="{{ nickname or '' }}" placeholder="评论时会显示这个名字" maxlength="20" autocomplete="nickname">
+        </div>
+
+        <div class="field">
+          <div class="label-row"><label class="label" for="email">邮箱<span class="req">*</span></label><span class="hint">用于登录与接收订阅</span></div>
+          <input class="input" id="email" name="email" type="email" value="{{ email or '' }}" placeholder="you@example.com" autocomplete="email">
+        </div>
+
+        <div class="field">
+          <div class="label-row"><label class="label" for="password">设置密码<span class="req">*</span></label><span class="hint" id="pwTip">建议 8 位以上，含字母与数字</span></div>
+          <div class="pw-field">
+            <input class="input" id="password" name="password" type="password" placeholder="至少 8 位" autocomplete="new-password">
+            <button class="pw-toggle" type="button" data-pw-toggle="password">显示</button>
+          </div>
+          <div class="pw-meter" id="pwMeter" data-score="0"><i></i><i></i><i></i><i></i></div>
+        </div>
+
+        <div class="field">
+          <div class="label-row"><label class="label" for="password2">确认密码<span class="req">*</span></label></div>
+          <div class="pw-field">
+            <input class="input" id="password2" name="password2" type="password" placeholder="再输入一次" autocomplete="new-password">
+            <button class="pw-toggle" type="button" data-pw-toggle="password2">显示</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="label-row"><span class="label">感兴趣的板块</span><span class="hint">可多选，注册后仍可修改</span></div>
+          <div class="pick-grid">
+            <button type="button" class="pick" data-pick>人工智能</button>
+            <button type="button" class="pick" data-pick>生命科学</button>
+            <button type="button" class="pick" data-pick>物理</button>
+            <button type="button" class="pick" data-pick>航天</button>
+            <button type="button" class="pick" data-pick>能源材料</button>
+            <button type="button" class="pick" data-pick>计算机</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="checkline">
+            <input type="checkbox" id="agree" name="agree" value="1">
+            <span>我已阅读并同意《用户协议》与《隐私说明》，了解本站为学习用途演示站点，账号只保存在进程内存中。</span>
+          </label>
+        </div>
+
+        <button class="btn btn-solid btn-block" type="submit">创建账号</button>
+      </form>
+
+      <p class="auth-switch">
+        已经注册过？<a href="{{ url_for('login') }}">去登录</a>
+      </p>
+    </div>
+  </main>
+</div>
+{% endblock %}

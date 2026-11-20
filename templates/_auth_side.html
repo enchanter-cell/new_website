@@ -1,0 +1,21 @@
+{# 登录/注册页共用的左侧品牌区。
+   用 include 而不是复制粘贴：一处改，两页生效。
+   传入 side_foot：页脚那行统计文字，两页不一样。 #}
+<aside class="auth-side">
+  {% with extra = '' %}{% include '_brand.html' %}{% endwith %}
+
+  <div>
+    <h2>{{ side_title|safe }}</h2>
+    <p class="side-lead">{{ side_lead }}</p>
+    <ul class="side-list">
+      {% for item in side_list %}
+      <li>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>
+        <span>{{ item }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="side-foot">{{ side_foot }}</div>
+</aside>

@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% block title %}{{ article.title }} · 格物{% endblock %}
+{% block desc %}{{ article.excerpt }}{% endblock %}
+
+{% block content %}
+
+<!-- ================= 文章头部 ================= -->
+<header class="article-head">
+  <div class="wrap">
+    <nav class="breadcrumb" aria-label="位置">
+      <a href="{{ url_for('index') }}">首页</a>
+      <span class="sep">/</span>
+      <a href="{{ url_for('index') }}#topics">{{ article.cat }}</a>
+      <span class="sep">/</span>
+      <span>正文</span>
+    </nav>
+
+    <h1>{{ article.title }}</h1>
+    <p class="article-dek">{{ article.dek }}</p>
+
+    <div class="article-byline">
+      <span class="avatar">{{ article.author[0] }}</span>
+      <div>
+        <span class="byline-name">{{ article.author }}</span>
+        <span class="byline-sub">{{ article.role }} · 审稿 2 人</span>
+      </div>
+      <span style="width:3px;height:3px;border-radius:50%;background:var(--muted-2)"></span>
+      <span>{{ article.date|cn_date }}</span>
+      <span style="width:3px;height:3px;border-radius:50%;background:var(--muted-2)"></span>
+      <span>预计阅读 {{ article.read }}</span>
+    </div>
+  </div>
+</header>
+
+<!-- ================= 正文 + 侧栏 ================= -->
+<div class="wrap">
+  <div class="article-layout">
+    <article>
+      <div class="prose">
+        {% for b in article.blocks %}
+          {% if b.t == 'p' %}
+            <p>{{ b.text|safe }}</p>
+          {% elif b.t == 'h2' %}
+            <h2 id="{{ b.id }}">{{ b.text }}</h2>
+          {% elif b.t == 'h3' %}
+            <h3>{{ b.text }}</h3>
+          {% elif b.t == 'quote' %}
+            <blockquote><p>{{ b.text }}</p></blockquote>
+          {% elif b.t == 'key' %}
+            <div class="keybox">
+              <div class="kb-title">{{ b.title }}</div>
+              <div><p>{{ b.text }}</p></div>
+            </div>
+          {% elif b.t == 'list' %}
+            <ul>
+              {% for it in b['items'] %}<li>{{ it }}</li>{% endfor %}
+            </ul>
+          {% elif b.t == 'fig' %}
+            <figure class="figure">
+              <div class="figure-frame">
+                <canvas data-art="{{ b.art }}" data-seed="{{ b.seed }}" style="aspect-ratio:16/9;height:auto"></canvas>
+              </div>
+              <figcaption>{{ b.cap }}</figcaption>
+            </figure>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      <div class="article-tags">
+        {% for t in article.tags %}<span class="tag">#{{ t }}</span>{% endfor %}
+      </div>
+
+      <div class="article-actions">
+        <button class="icon-btn" data-action="bookmark" type="button">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12v17l-6-4-6 4z"/></svg>
+          收藏
+        </button>
+        <button class="icon-btn" data-action="share" type="button">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.6l6.8-4.2M8.6 13.4l6.8 4.2"/></svg>
+          复制链接
+        </button>
+        <a class="icon-btn" href="{{ url_for('comment', article=article.slug) }}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-8 8H8l-5 3 1.6-5A8 8 0 1 1 21 12z"/></svg>
+          写评论
+        </a>
+        <span class="hint" style="margin-left:auto">最后更新：{{ article.date }} · 已勘误 0 次</span>
+      </div>
+
+      <!-- 评论区 -->
+      <section class="comments" id="comments">
+        <div class="comments-head">
+          <h2>读者评论 <span class="hint">（{{ comments|length }} 条）</span></h2>
+          <a class="btn btn-ghost btn-sm" href="{{ url_for('comment', article=article.slug) }}">发表我的看法</a>
+        </div>
+        {% for c in comments %}
+        <div class="comment-item">
+          <span class="avatar">{{ c.initial }}</span>
+          <div>
+            <div class="comment-top">
+              <b>{{ c.name }}</b>
+              <time>{{ c.time }}</time>
+              <span class="stars">
+                {% for i in range(5) %}{% if i < c.stars %}★{% else %}<span class="off">★</span>{% endif %}{% endfor %}
+              </span>
+            </div>
+            <p>{{ c.text }}</p>
+          </div>
+        </div>
+        {% endfor %}
+      </section>
+
+      <!-- 相关阅读 -->
+      <section class="comments" style="margin-top:44px">
+        <div class="comments-head"><h2>接着读</h2></div>
+        <div class="related-list">
+          {% for r in related %}
+          <a class="related-item" href="{{ url_for('detail', slug=r.slug) }}">
+            <span class="related-thumb"><canvas data-art="{{ r.art }}" data-seed="{{ r.seed }}"></canvas></span>
+            <span class="related-text">
+              <b>{{ r.title }}</b>
+              <em>{{ r.cat }} · {{ r.read }}</em>
+            </span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+          </a>
+          {% endfor %}
+        </div>
+      </section>
+    </article>
+
+    <!-- 侧栏 -->
+    <aside class="sidebar">
+      {% if toc %}
+      <div class="side-card">
+        <div class="side-title">本文目录</div>
+        <ul class="toc">
+          {% for h in toc %}
+            <li><a href="#{{ h.id }}">{{ h.text }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <div class="side-card">
+        <div class="side-title">文章信息</div>
+        <dl class="facts">
+          <div><dt>板块</dt><dd>{{ article.cat }}</dd></div>
+          <div><dt>作者</dt><dd>{{ article.author }}</dd></div>
+          <div><dt>发布</dt><dd>{{ article.date }}</dd></div>
+          <div><dt>阅读时长</dt><dd>{{ article.read }}</dd></div>
+          <div><dt>信息来源</dt><dd>论文 / 官方发布</dd></div>
+        </dl>
+      </div>
+
+      <div class="side-card">
+        <div class="side-title">延伸阅读 · 书目</div>
+        {# 书目现在有了自己的详情页 /book/<id>，点直达“书里面”（脉络、看点、读法）；
+           想在书单里定位再走 /books?book=ID，入口在书详情页里。 #}
+        {% for b in related_books %}
+        <a class="book-mini" href="{{ url_for('book_detail', book_id=b.id) }}">
+          <span class="book-spine"></span>
+          <div>
+            <b>{{ b.title }}</b>
+            <span>{{ b.author }} · {{ b.level }}</span>
+          </div>
+        </a>
+        {% endfor %}
+        <a class="arrow-link" href="{{ url_for('books') }}" style="margin-top:16px;font-size:13.5px">查看完整书单</a>
+      </div>
+
+      <div class="side-card" style="background:var(--accent-soft);border-color:#cbe5e0">
+        <div class="side-title" style="color:#3d7d76">有疑问？</div>
+        <p style="font-size:13.5px;color:#17423e;margin:0 0 14px">发现事实错误或表述不清，欢迎在评论区指出，编辑部会在 48 小时内回应。</p>
+        <a class="btn btn-accent btn-sm btn-block" href="{{ url_for('comment', article=article.slug) }}">发表评论</a>
+      </div>
+    </aside>
+  </div>
+</div>
+
+{% endblock %}

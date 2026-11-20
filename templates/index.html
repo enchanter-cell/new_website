@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% block title %}格物 · 把前沿科技讲成人话{% endblock %}
+
+{% block content %}
+
+<!-- ================= HERO ================= -->
+<section class="hero">
+  <div class="wrap hero-inner">
+    <div>
+      <span class="hero-badge"><i></i>本周更新 3 篇 · 全部标注信息来源</span>
+      <h1>看懂科技，<br>不必先成为<span class="hl">专家</span>。</h1>
+      <p class="hero-lead">
+        格物用可验证的事实、能复述的比喻和一张张示意图，
+        把人工智能、生命科学、物理与航天讲到普通人能读懂、能和别人讲明白的程度。
+      </p>
+
+      <form class="hero-search" action="{{ url_for('index') }}" method="get" role="search">
+        <input type="search" name="q" value="{{ q }}" placeholder="试试搜索：量子纠缠 / 大模型 / 光刻" aria-label="搜索文章">
+        <button class="btn btn-accent" type="submit">
+          搜索
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        </button>
+      </form>
+
+      <div class="hero-stats">
+        <div><b>{{ total_all }}</b><span>深度长文</span></div>
+        <div><b>{{ categories|length - 1 }}</b><span>知识板块</span></div>
+        <div><b>100%</b><span>标注来源</span></div>
+      </div>
+    </div>
+
+    <aside class="hero-feature">
+      <div class="hero-feature-label">
+        <span>EDITOR'S PICK / 本期主推</span>
+        <span>NO. 01</span>
+      </div>
+      <a class="hero-thumb" href="{{ url_for('detail', slug=featured.slug) }}" aria-label="{{ featured.title }}">
+        <canvas data-art="{{ featured.art }}" data-seed="{{ featured.seed }}"></canvas>
+      </a>
+      <h3><a href="{{ url_for('detail', slug=featured.slug) }}">{{ featured.title }}</a></h3>
+      <p>{{ featured.excerpt }}</p>
+      <div class="meta-row">
+        <span>{{ featured.cat }}</span><span class="dot"></span>
+        <span>{{ featured.read }}</span><span class="dot"></span>
+        <span>{{ featured.date }}</span>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ================= 知识板块 ================= -->
+<section class="topic-band" id="topics">
+  <div class="wrap">
+    <div class="topic-list">
+      <a class="topic-item" href="#articleGrid">
+        <span class="idx">01 / AI &amp; COMPUTE</span>
+        <h3>人工智能与计算</h3>
+        <p>模型怎么学、芯片怎么做小、数据怎么被记住。</p>
+        <span class="count">3 篇文章 · 2 本书目</span>
+      </a>
+      <a class="topic-item" href="#articleGrid">
+        <span class="idx">02 / LIFE &amp; MATTER</span>
+        <h3>生命科学与材料</h3>
+        <p>基因编辑、免疫识别、电池里的化学博弈。</p>
+        <span class="count">3 篇文章 · 3 本书目</span>
+      </a>
+      <a class="topic-item" href="#articleGrid">
+        <span class="idx">03 / SPACE &amp; PHYSICS</span>
+        <h3>物理与航天</h3>
+        <p>纠缠、轨道、火箭分级背后的硬约束。</p>
+        <span class="count">3 篇文章 · 3 本书目</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 文章列表 ================= -->
+<section class="section" id="articles">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Latest</span>
+        <h2 class="section-title">最新长文</h2>
+        <p class="section-sub">每篇都从“这个问题为什么难”讲起，不跳过关键推导，也不堆公式。</p>
+      </div>
+      <a class="arrow-link" href="{{ url_for('books') }}">
+        配套书单
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+
+    <div class="filter-bar" id="topicChips">
+      {% for c in categories %}
+        <a class="chip {% if c.key == current_cat or (c.key == 'all' and not current_cat) %}is-active{% endif %}"
+           href="{{ url_for('index', cat=(c.key if c.key != 'all' else none), q=(q or none)) }}">{{ c.name }}</a>
+      {% endfor %}
+    </div>
+
+    {# 筛选/搜索状态条：告诉用户当前在看什么，并提供一键清除 #}
+    {% if current_cat or q %}
+    <div class="filter-status">
+      {% if q %}
+        <span>搜索「{{ q }}」：{{ total }} 篇</span>
+      {% else %}
+        <span>分类「{{ current_cat_name }}」：{{ total }} 篇</span>
+      {% endif %}
+      <a href="{{ url_for('index') }}">查看全部 →</a>
+    </div>
+    {% endif %}
+
+    <div class="card-grid" id="articleGrid">
+      {% for a in articles %}
+      <article class="card reveal" data-cat="{{ a.cat_key }}">
+        <div class="card-media">
+          <span class="card-cat">{{ a.cat }}</span>
+          <a href="{{ url_for('detail', slug=a.slug) }}" aria-label="{{ a.title }}">
+            <canvas class="art" data-art="{{ a.art }}" data-seed="{{ a.seed }}"></canvas>
+          </a>
+            <span class="card-no">NO. {{ "%02d"|format((page - 1) * 9 + loop.index) }}</span>
+        </div>
+        <div class="card-body">
+          <h3><a href="{{ url_for('detail', slug=a.slug) }}">{{ a.title }}</a></h3>
+          <p class="card-excerpt">{{ a.excerpt }}</p>
+          <div class="card-foot">
+            <span>{{ a.author }} · {{ a.read }}</span>
+            <a class="arrow-link" href="{{ url_for('detail', slug=a.slug) }}">阅读</a>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+
+    {% if total == 0 %}
+      <p class="hint" style="padding:26px 0">没有找到匹配的文章，换个关键词或分类试试。</p>
+    {% endif %}
+
+    {% include '_pagination.html' %}
+  </div>
+</section>
+
+<!-- ================= 关于 ================= -->
+<section class="section section-tight" id="about" style="background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+  <div class="wrap about-grid">
+    <div>
+      <span class="eyebrow">About GeWu</span>
+      <h2 class="section-title">我们只做一件事：把“看不懂”变少一点</h2>
+      <p style="margin-top:16px">
+        格物不追热点式的标题，也不把复杂问题压缩成一句口号。每篇文章都尽量交代三件事：
+        这个问题原来难在哪里、研究者是怎么做的、现在还有哪些没解决。你读完不一定记住数字，
+        但应该能向别人讲清楚逻辑。
+      </p>
+      <ul class="about-points">
+        <li><span class="num">01</span><div><b>事实与推测分开写</b>能查证的数字给出来源；没有定论的，写清“目前认为”。</div></li>
+        <li><span class="num">02</span><div><b>比喻负责建立直觉，不负责代替机制</b>每个比喻后面都会补一句它在哪儿不成立。</div></li>
+        <li><span class="num">03</span><div><b>错了就改，改了就记</b>勘误记录公开，读者指出问题会在 48 小时内回应。</div></li>
+      </ul>
+    </div>
+    <div class="quote-card">
+      <blockquote>“所谓理解，不是能背出结论，而是知道这个结论在什么条件下成立、又在什么条件下会失效。”</blockquote>
+      <div class="who">— 格物编辑部 · 内容准则第一条</div>
+      <div class="sign">写作者 6 人 · 审稿 2 人 · 累计勘误 14 次</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 订阅 ================= -->
+<section class="section section-tight">
+  <div class="wrap">
+    <div class="subscribe">
+      <div>
+        <h3>每周一封科普信</h3>
+        <p>精选 3 篇长文 + 1 份书单，不追热点，只讲值得弄懂的事。</p>
+      </div>
+      <form id="subForm">
+        <input type="email" placeholder="you@example.com" aria-label="邮箱地址" required>
+        <button class="btn btn-solid" type="submit">订阅</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

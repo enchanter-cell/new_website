@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}登录 · 格物{% endblock %}
+{% block bodyclass %}auth-page{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+
+  {% set side_title = '把复杂的世界，<br>一点点<em>看明白</em>。' %}
+  {% set side_lead = '登录后可以收藏长文、参与讨论，并同步你的阅读进度。' %}
+  {% set side_list = ['收藏文章与书单，跨设备同步', '评论优先展示，可直接收到作者回复', '每周科普信，只看值得弄懂的三件事'] %}
+  {% set side_foot = '© 2026 格物 GeWu · 学习用途演示站点' %}
+  {% include '_auth_side.html' %}
+
+  <main class="auth-main">
+    <div class="auth-form">
+      <a class="auth-back" href="{{ url_for('index') }}">← 返回首页</a>
+      <div class="kicker">Welcome back</div>
+      <h1>登录你的账号</h1>
+      <p class="lead">还没有账号？<a href="{{ url_for('register') }}" style="color:var(--accent-ink);font-weight:600">免费注册</a></p>
+
+      <form id="loginForm" method="post" action="{{ url_for('login') }}" novalidate>
+        {% if error %}<div class="form-error">{{ error }}</div>{% endif %}
+        <input type="hidden" name="next" value="{{ request.args.get('next', '') }}">
+
+        <div class="field">
+          <div class="label-row"><label class="label" for="account">邮箱</label></div>
+          <input class="input" id="account" name="account" type="text" value="{{ account or '' }}" placeholder="you@example.com" autocomplete="username">
+        </div>
+
+        <div class="field">
+          <div class="label-row">
+            <label class="label" for="password">密码</label>
+            <a class="hint" href="#" data-demo="找回密码">忘记密码？</a>
+          </div>
+          <div class="pw-field">
+            <input class="input" id="password" name="password" type="password" placeholder="请输入密码" autocomplete="current-password">
+            <button class="pw-toggle" type="button" data-pw-toggle="password">显示</button>
+          </div>
+        </div>
+
+        <div class="auth-row">
+          <span class="hint">演示账号：demo@gewu.site / gewu1234</span>
+        </div>
+
+        <button class="btn btn-solid btn-block" type="submit">登录</button>
+      </form>
+
+      <div class="divider">或使用以下方式</div>
+      <div class="oauth-row">
+        <button class="oauth" type="button" data-demo="微信登录">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 4C4.6 4 1 6.9 1 10.5c0 2 1.1 3.8 2.9 5L3 18.4l3.2-1.6c.9.2 1.8.3 2.8.3h.6a5.6 5.6 0 0 1-.2-1.5c0-3.4 3.2-6.1 7.2-6.1h.5C16.4 6.6 13 4 9 4zm-2.4 3.2a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm4.8 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/><path d="M23 15.5c0-2.8-2.7-5.1-6-5.1s-6 2.3-6 5.1 2.7 5.1 6 5.1c.8 0 1.5-.1 2.2-.3l2.6 1.3-.7-2.3c1.2-.9 1.9-2.3 1.9-3.8zm-8-1.4a.9.9 0 1 1 0 1.8.9.9 0 0 1 0-1.8zm4.2 0a.9.9 0 1 1 0 1.8.9.9 0 0 1 0-1.8z"/></svg>
+          微信
+        </button>
+        <button class="oauth" type="button" data-demo="校园统一认证">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9.5L12 4l9 5.5"/><path d="M5 10.5V19h14v-8.5"/><path d="M9.5 19v-5h5v5"/></svg>
+          校园账号
+        </button>
+      </div>
+
+      <p class="auth-switch">
+        第一次来？<a href="{{ url_for('register') }}">创建账号</a>
+      </p>
+      <p class="hint" style="text-align:center;margin-top:18px">
+        登录即表示同意《用户协议》与《隐私说明》。演示站点账号只存在内存里，重启服务即清空。
+      </p>
+    </div>
+  </main>
+</div>
+{% endblock %}

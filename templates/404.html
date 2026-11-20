@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}页面走丢了吗 · 格物{% endblock %}
+
+{% block content %}
+<section class="not-found">
+  <div class="wrap">
+    <div class="code">404</div>
+    <h1>这个页面可能被作者改到别处了</h1>
+    <p>我们检查过所有文章与书单，没有找到你要访问的地址。可以先回到首页，或者从最新长文里挑一篇。</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <a class="btn btn-solid" href="{{ url_for('index') }}">回到首页</a>
+      <a class="btn btn-ghost" href="{{ url_for('books') }}">看看书单</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}推荐书单 · 格物{% endblock %}
+{% block desc %}按知识板块整理的科普书单，标注难度与阅读顺序，帮你在读完一篇文章后接着往下走。{% endblock %}
+
+{% block content %}
+
+<!-- ================= 书目 Hero ================= -->
+<section class="books-hero">
+  <div class="wrap">
+    <div>
+      <span class="eyebrow" style="color:#7ee2d6">Reading List · 2026</span>
+      <h1>读完文章，再读一本书</h1>
+      <p>
+        科普文章解决“这件事大概是怎么回事”，一本书才解决“它为什么必然如此”。
+        下面的书单按板块整理，标了难度与阅读顺序，不必从头买到尾，先挑你正在好奇的那本。
+      </p>
+    </div>
+    {# total_all：全量统计，不随筛选变化；下面的书单区才用筛选后的 total #}
+    <div class="books-stats">
+      <div><b>{{ total_all }}</b><span>本精选</span></div>
+      <div><b>{{ categories|length }}</b><span>覆盖板块</span></div>
+      <div><b>3</b><span>难度分级</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 书单 ================= -->
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Shelves</span>
+        <h2 class="section-title">按板块挑书</h2>
+        <p class="section-sub">难度标签：入门适合零基础；进阶需要一点专业背景；硬核是教材级，建议配合课程阅读。</p>
+      </div>
+    </div>
+
+    {# 筛选从“JS 在浏览器里藏卡片”改成“链接跳转 ?cat=xx”。
+       好处：筛选状态进 URL，能分享、能前进后退、翻页时不会丢——这三件事纯 JS 筛选都做不到。
+       链接里不带 page 参数，等于“点筛选永远回第 1 页”，符合直觉。 #}
+    <div class="filter-bar" id="bookChips">
+      <a class="chip {% if not current_cat %}is-active{% endif %}" href="{{ url_for('books') }}">全部</a>
+      {% for c in categories %}
+        <a class="chip {% if c.key == current_cat %}is-active{% endif %}"
+           href="{{ url_for('books', cat=c.key) }}">{{ c.name }}</a>
+      {% endfor %}
+    </div>
+
+    {# 筛选状态条：告诉用户当前在看什么，并提供一键清除 #}
+    {% if current_cat %}
+    <div class="filter-status">
+      <span>分类「{{ current_cat_name }}」：{{ total }} 本</span>
+      <a href="{{ url_for('books') }}">查看全部 →</a>
+    </div>
+    {% endif %}
+
+    {# book-<id> 锚点 + is-target 高亮：文章页的“延伸阅读”跳过来就靠它们定位 #}
+    <div class="book-grid" id="bookGrid">
+      {% for b in books %}
+        {% set lv = 'mid' if b.level == '进阶' else ('hard' if b.level == '硬核' else '') %}
+        <article class="book-card reveal {% if current_book and current_book.id == b.id %}is-target{% endif %}"
+                 id="book-{{ b.id }}">
+          {# 封面和书名都链到这本书的详情页 /book/<id>：点书 = 走进这本书 #}
+          <a class="book-cover" data-tone="{{ b.tone }}" href="{{ url_for('book_detail', book_id=b.id) }}">
+            <span>{{ b.title }}</span>
+          </a>
+          <div class="book-info">
+            <h3><a href="{{ url_for('book_detail', book_id=b.id) }}">{{ b.title }}</a></h3>
+            <div class="book-author">{{ b.author }} · {{ b.year }}</div>
+            <p>{{ b.desc }}</p>
+            <p style="font-size:12.5px;color:var(--accent-ink);margin:-4px 0 12px">为什么读：{{ b.why }}</p>
+            <div class="book-foot">
+              <span class="level {{ lv }}">{{ b.level }}</span>
+              {# related_slug 有值 = 站内有一篇真讲这本书的文章，直达正文；
+                 没配对的书不显示链接——宁可少一个入口，不误导读者。 #}
+              {% if b.related_slug %}
+              <a class="link" href="{{ url_for('detail', slug=b.related_slug) }}">读对应文章 →</a>
+              {% endif %}
+            </div>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+
+    {% if total == 0 %}
+      <p class="hint" style="padding:26px 0">这个板块暂时没有收录书目，欢迎在评论区推荐。</p>
+    {% endif %}
+
+    {% include '_pagination.html' %}
+
+    <div class="shelf-note">
+      <div>
+        <b>怎么用这份书单</b>
+        <p>
+          不要同时开五本书。选一本入门的，读完一章就回到对应文章，用文章里的比喻检验自己是否真的理解；
+          遇到卡住的地方，先记下来，再读下一章。进阶书不必通读，把它当工具书，按问题查章节更高效。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 阅读路径 ================= -->
+<section class="section-tight" style="background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Path</span>
+        <h2 class="section-title">三条入门路径</h2>
+      </div>
+      <a class="arrow-link" href="{{ url_for('index') }}#articles">回到文章列表
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+    <div class="topic-list">
+      <div class="topic-item" style="padding-left:0">
+        <span class="idx">路径 A / 8 周</span>
+        <h3>想搞懂 AI 到底在做什么</h3>
+        <p>《数学之美》→ 站内“大模型为什么会胡说” → 《人工智能：一种现代方法》选读第 1、2、21 章。</p>
+        <span class="count">先建立概率视角，再看模型结构</span>
+      </div>
+      <div class="topic-item">
+        <span class="idx">路径 B / 10 周</span>
+        <h3>对生命科学好奇</h3>
+        <p>《基因传》→ 站内“CRISPR”与“免疫识别” → 《自私的基因》带着批判读。</p>
+        <span class="count">先看历史与人物，再进机制</span>
+      </div>
+      <div class="topic-item">
+        <span class="idx">路径 C / 6 周</span>
+        <h3>喜欢物理与航天</h3>
+        <p>《上帝掷骰子吗》→ 站内“量子纠缠” → 《时间简史》→ 站内火箭与轨道两篇。</p>
+        <span class="count">先建立反直觉，再补数学</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

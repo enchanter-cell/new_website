@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}{{ book.title }} · 推荐书单 · 格物{% endblock %}
+{% block desc %}{{ book.intro }}{% endblock %}
+
+{% block content %}
+
+<!-- ================= 书籍头部 ================= -->
+<header class="book-hero">
+  <div class="wrap">
+    <nav class="breadcrumb" aria-label="位置">
+      <a href="{{ url_for('books') }}">推荐书单</a>
+      <span class="sep">/</span>
+      <span>{{ book.tag }}</span>
+      <span class="sep">/</span>
+      <span>书详情</span>
+    </nav>
+
+    <div class="book-hero-layout">
+      <a class="book-cover book-cover-lg" data-tone="{{ book.tone }}" href="{{ url_for('books', book=book.id) }}" title="在书单中定位这本书">
+        <span>{{ book.title }}</span>
+      </a>
+      <div class="book-hero-info">
+        <span class="eyebrow" style="color:#7ee2d6">{{ book.tag }} · {{ book.level }}</span>
+        <h1>{{ book.title }}</h1>
+        <p class="book-hero-author">{{ book.author }} · {{ book.year }} · {{ cat_name }}板块</p>
+        {% if book.pub %}
+        <p class="book-hero-pub">{{ book.pub }}</p>
+        {% endif %}
+        <div class="book-hero-actions">
+          {% if related_article %}
+            <a class="btn btn-accent" href="{{ url_for('detail', slug=related_article.slug) }}">读站内对应文章：{{ related_article.title }}</a>
+          {% else %}
+            <span class="book-no-article">站内暂无直接讲它的文章，先看下面的导读</span>
+          {% endif %}
+          <a class="btn btn-ghost" href="{{ url_for('books', book=book.id) }}">在书单中定位 →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ================= 导读 + 侧栏 ================= -->
+<div class="wrap">
+  <div class="article-layout">
+    <article>
+      <div class="prose">
+        <h2 id="intro">这本书讲了什么</h2>
+        <p>{{ book.intro }}</p>
+        <p class="book-why">为什么读它：{{ book.why }}</p>
+
+        {% if book.structure %}
+        <h2 id="structure">全书脉络</h2>
+        <p class="muted-note">按书的真实结构整理成主题脉络，读的时候可以对照着走。</p>
+        <ol class="book-structure">
+          {% for s in book.structure %}
+          <li><b>{{ loop.index }}</b><span>{{ s }}</span></li>
+          {% endfor %}
+        </ol>
+        {% endif %}
+
+        {% if book.highlights %}
+        <h2 id="highlights">核心看点</h2>
+        <div class="book-highlights">
+          {% for h in book.highlights %}
+          <div class="book-highlight">
+            <i></i><p>{{ h }}</p>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if book.read_tip %}
+        <div class="keybox">
+          <div class="kb-title">怎么读</div>
+          <div><p>{{ book.read_tip }}</p></div>
+        </div>
+        {% endif %}
+      </div>
+    </article>
+
+    {# .sidebar：sticky 定位 + 卡片间距（与文章详情页共用样式）；#}
+    <aside class="sidebar">
+      <div class="side-card">
+        <div class="side-title">延伸阅读</div>
+        {% if related_article %}
+        <a class="book-mini" href="{{ url_for('detail', slug=related_article.slug) }}">
+          <span class="book-spine"></span>
+          <div>
+            <b>{{ related_article.title }}</b>
+            <span>{{ related_article.author }} · 站内文章</span>
+          </div>
+        </a>
+        <p class="side-note">这篇就是讲这本书对应主题的科普文，先读文章再读书，最容易读进去。</p>
+        {% else %}
+        <p class="side-note">站内还没有直接讲这本书的文章。想看主题科普，去书单里逛逛其他板块。</p>
+        {% endif %}
+      </div>
+
+      <div class="side-card">
+        <div class="side-title">想买这本书？</div>
+        {# 外链两件事必须做：
+           1) target="_blank" 新窗口打开，不打断读者在本页的阅读；
+           2) rel="noopener" 不让对方页面拿到 window.opener（安全习惯）。 #}
+        <div class="buy-list">
+          {% for name, url in buy_links %}
+          <a class="buy-btn" href="{{ url }}" target="_blank" rel="noopener">
+            {{ name }}<span>→</span>
+          </a>
+          {% endfor %}
+        </div>
+        <p class="side-note">
+          链接直达各平台的站内搜索，搜索结果与本站无关；二手书可去孔夫子旧书网，电子版可用微信读书检索书名。
+        </p>
+      </div>
+
+      <div class="side-card">
+        <div class="side-title">同板块接着逛</div>
+        {% for b in same_cat_books %}
+        <a class="book-mini" href="{{ url_for('book_detail', book_id=b.id) }}">
+          <span class="book-spine"></span>
+          <div>
+            <b>{{ b.title }}</b>
+            <span>{{ b.author }} · {{ b.level }}</span>
+          </div>
+        </a>
+        {% endfor %}
+        {% if not same_cat_books %}
+        <p class="side-note">这个板块暂时只有这一本。</p>
+        {% endif %}
+      </div>
+
+      <div class="side-card" style="background:var(--accent-soft);border-color:#cbe5e0">
+        <div class="side-title" style="color:#3d7d76">想在书单里看它？</div>
+        <p style="font-size:13.5px;color:#17423e;margin:0 0 14px">书目页会自动翻到这本书所在的那一页，并把它高亮出来。</p>
+        <a class="btn btn-accent btn-sm btn-block" href="{{ url_for('books', book=book.id) }}">去书单定位</a>
+      </div>
+    </aside>
+  </div>
+</div>
+
+{% endblock %}
